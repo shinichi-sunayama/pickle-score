@@ -131,6 +131,7 @@ A screen recording from a physical iPhone, starting on the Home Screen, is attac
 1. 実機の iPhone で「画面収録」を始め、**ホーム画面から**「おはぎコール」を開く。緑・赤のボタンを何回か、「1つ戻す」、履歴（時計のボタン）、設定で声を選ぶ（試しに鳴る）まで、30秒〜1分。
 2. 動画を Claude に渡す → `tools/review-video.ps1`（ほえほえチワ隊のものを流用）と同じ方法で、ホーム画面のぼかし・無音・30fps・高さ 1920 に加工する。**加工前の動画はそのまま付けない**（壁紙・通知が映る）。
 3. 「App Review に関する情報」の「添付ファイル」に加工した動画を付けて「保存」。
+- 2026-11-15 加工済み：`C:\Users\sunay\Dropbox\iOSアプリ用\OhagiPickleballCall_v1.0_AppReview_iPhone.mp4`（50秒、888×1920、30fps、無音。最初の 1.7 秒はアイコン以外をぼかし。chiwa-survivor の `tools/review-video.ps1 -BlurSeconds 1.7 -Keep 0.15,0.55,0.23,0.125`）
 - Apple Watch は画面収録ができないので、メモの説明だけでよい。
 
 ### バージョンのリリース
