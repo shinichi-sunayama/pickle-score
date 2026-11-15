@@ -4,6 +4,7 @@ import {
   createMatch, matchState, recordRally, undoRally, canUndo,
 } from "../web/core.js";
 import { callTokens } from "../web/voice.js";
+import { recordFromMatch, upsertHistory, removeFromHistory, timeline, sanitizeHistory } from "../web/history.js";
 
 function describeState(s) {
   return `${scoreCall(s)} ${serveSide(s) === "right" ? "R" : "L"} T${s.serving}`;
@@ -86,6 +87,33 @@ const unitTests = [
     eq(callTokens(replay({}, "L"), "sideout"), ["sideout", 0, 0, 1], "side out then call");
     eq(callTokens(replay({ players: "singles" }, "WW")), [2, 0], "singles");
     eq(callTokens(replay({ players: "singles" }, "LWWWWWWWWWWW")), ["gameset", 11, 0], "game over: winner first");
+  }],
+  ["history: record, replace, remove, limit", () => {
+    const m = { ...createMatch({ players: "singles" }), id: "g1", results: "WWWWWWWWWWW" };
+    const rec = recordFromMatch(m, 1000);
+    eq([rec.id, rec.score, rec.winner, rec.rallies, rec.endedAt], ["g1", [11, 0], 0, 11, 1000], "record");
+    let h = upsertHistory([], rec);
+    h = upsertHistory(h, { ...rec, endedAt: 2000 });
+    eq(h.length, 1, "same id replaced");
+    eq(h[0].endedAt, 2000, "newest kept");
+    h = upsertHistory(h, recordFromMatch({ ...m, id: "g2", results: "W" }, 3000));
+    eq(h.map((r) => r.id), ["g2", "g1"], "newest first");
+    eq(h[0].winner, null, "unfinished game has no winner");
+    eq(removeFromHistory(h, "g1").map((r) => r.id), ["g2"], "remove");
+    let many = [];
+    for (let i = 0; i < 40; i++) many = upsertHistory(many, { ...rec, id: `x${i}` }, 30);
+    eq(many.length, 30, "limit");
+    eq(many[0].id, "x39", "latest on top");
+  }],
+  ["history: timeline lists the call before each rally", () => {
+    const rows = timeline(normalizeConfig({}), "LWL");
+    eq(rows.map((r) => `${r.call}${r.result || ""}`), ["0-0-2L", "0-0-1W", "1-0-1L", "1-0-2"], "calls and results");
+    eq(rows[1].side, "right", "side");
+  }],
+  ["history: sanitize drops broken records", () => {
+    const good = { id: "a", endedAt: 1, config: {}, results: "WL" };
+    eq(sanitizeHistory([good, null, { id: 1 }, { ...good, results: "WX" }, "x"]), [good], "only good");
+    eq(sanitizeHistory("nope"), [], "not a list");
   }],
   ["normalizeConfig rejects bad values", () => {
     throws(() => normalizeConfig({ players: "triples" }), "players");

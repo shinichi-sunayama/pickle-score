@@ -4,10 +4,13 @@ import {
   scoreCall, serveSide,
 } from "./core.js";
 import { callTokens, createSpeaker } from "./voice.js";
+import { recordFromMatch, upsertHistory, removeFromHistory, timeline, sanitizeHistory } from "./history.js";
 
-const APP_VERSION = "0.3.0"; // keep in sync with CACHE_NAME in sw.js
+const APP_VERSION = "0.4.0"; // keep in sync with CACHE_NAME in sw.js
 const STORE_MATCH = "pickle-score.match";
 const STORE_PREFS = "pickle-score.prefs";
+const STORE_HISTORY = "pickle-score.history";
+const DOGS = ["ohagi", "kinako", "shiratama", "dorayaki", "yokan"];
 const TEAM_NAMES = ["自分たち", "相手"];
 const TAP_GUARD_MS = 400; // ignore a second tap this soon (prevents double counting)
 
@@ -27,16 +30,24 @@ function loadMatch() {
   const m = load(STORE_MATCH);
   try {
     if (m && typeof m.results === "string" && /^[WL]*$/.test(m.results)) {
-      const restored = { config: normalizeConfig(m.config), results: m.results };
+      const restored = { id: typeof m.id === "string" ? m.id : newId(), config: normalizeConfig(m.config), results: m.results };
       matchState(restored); // validate
       return restored;
     }
   } catch { /* fall through to a new match */ }
-  return createMatch(DEFAULT_CONFIG);
+  return freshMatch(DEFAULT_CONFIG);
+}
+
+function newId() {
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+function freshMatch(config) {
+  return { ...createMatch(config), id: newId() };
 }
 
 let match = loadMatch();
 let prefs = { ...DEFAULT_PREFS, ...(load(STORE_PREFS) || {}) };
+let gameHistory = sanitizeHistory(load(STORE_HISTORY));
 let lastTap = 0;
 const speaker = createSpeaker();
 speaker.setMode(prefs.voice);
@@ -111,6 +122,11 @@ function render(eventText = "", eventKind = "") {
     const w = s.winner;
     $("overTitle").textContent = `${TEAM_NAMES[w]}の勝ち`;
     $("overScore").textContent = `${s.score[w]}-${s.score[1 - w]}`;
+    if ($("over").hidden) {
+      // A different dog cheers each game (chosen from the game id so it stays the same on reload).
+      const k = [...match.id].reduce((a, ch) => a + ch.charCodeAt(0), 0) % DOGS.length;
+      $("overDog").src = `img/dogs/${DOGS[k]}.png`;
+    }
   }
   $("over").hidden = !over;
 }
@@ -164,6 +180,7 @@ function play(servingSideWon) {
   match = recordRally(match, servingSideWon);
   save(STORE_MATCH, match);
   const next = matchState(match);
+  if (next.winner !== null) saveToHistory();
   const ev = describeChange(prev, next);
   render(ev.text, ev.kind);
   buzz(ev.kind === "change" ? [40, 60, 40] : 30);
@@ -174,6 +191,8 @@ function play(servingSideWon) {
 function undo() {
   speaker.unlock();
   if (!canUndo(match)) return;
+  // Undoing the last point of a finished game reopens it, so it leaves the gameHistory for now.
+  if (matchState(match).winner !== null) { gameHistory = removeFromHistory(gameHistory, match.id); save(STORE_HISTORY, gameHistory); }
   match = undoRally(match);
   save(STORE_MATCH, match);
   render("1つ戻しました", "info");
@@ -181,8 +200,15 @@ function undo() {
   speaker.say(callTokens(matchState(match)));
 }
 
+function saveToHistory() {
+  if (!canUndo(match)) return; // nothing played
+  gameHistory = upsertHistory(gameHistory, recordFromMatch(match, Date.now()));
+  save(STORE_HISTORY, gameHistory);
+}
+
 function startNewMatch(config) {
-  match = createMatch(config);
+  saveToHistory(); // keeps a game stopped halfway too (finished games are already saved)
+  match = freshMatch(config);
   save(STORE_MATCH, match);
   render("新しい試合", "info");
   speaker.say(callTokens(matchState(match)));
@@ -209,6 +235,74 @@ $("speakBtn").addEventListener("click", () => {
   save(STORE_PREFS, prefs);
   render();
   speaker.say(callTokens(matchState(match)));
+});
+
+// ---------- gameHistory ----------
+const historyDialog = $("history");
+
+function rulesShort(c) {
+  return rulesLabel(normalizeConfig(c));
+}
+
+function whenLabel(ms) {
+  const d = new Date(ms);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getMonth() + 1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
+
+function el(tag, cls, text) {
+  const e = document.createElement(tag);
+  if (cls) e.className = cls;
+  if (text !== undefined) e.textContent = text;
+  return e;
+}
+
+function renderHistory() {
+  const box = $("historyList");
+  box.replaceChildren();
+  if (!gameHistory.length) { box.append(el("div", "hist-empty", "まだ試合の記録はありません")); return; }
+  for (const r of gameHistory) {
+    let config;
+    try { config = normalizeConfig(r.config); } catch { continue; }
+    const finished = r.winner === 0 || r.winner === 1;
+    const item = el("details", `hist-item${finished ? "" : " unfinished"}`);
+    const sum = el("summary");
+    sum.append(
+      el("span", "hist-when", whenLabel(r.endedAt)),
+      el("span", "hist-rules", rulesShort(config)),
+      el("span", "hist-result", finished ? `${TEAM_NAMES[r.winner]}の勝ち` : "途中まで"),
+      el("span", "hist-score", `${r.score[0]}-${r.score[1]}`),
+    );
+    item.append(sum);
+    // Build the rally list only when opened (keeps the dialog quick).
+    item.addEventListener("toggle", () => {
+      if (!item.open || item.querySelector(".hist-rows")) return;
+      const ol = el("ol", "hist-rows");
+      const head = el("li");
+      head.append(el("span", "n", "#"), el("span", "c", "コール"), el("span", "r", "そのラリー"));
+      ol.append(head);
+      for (const row of timeline(config, r.results)) {
+        const li = el("li");
+        let res;
+        if (row.result === "W") res = el("span", "r w", `${TEAM_NAMES[row.serving]}がサーブで取った`);
+        else if (row.result === "L") res = el("span", "r l", `${TEAM_NAMES[row.serving]}がサーブで落とした`);
+        else res = el("span", "r", row.winner !== null ? "ゲームセット" : "ここで終了");
+        li.append(el("span", "n", row.result ? String(row.n) : ""), el("span", "c", row.call), res);
+        ol.append(li);
+      }
+      item.append(ol);
+    });
+    box.append(item);
+  }
+}
+
+$("historyBtn").addEventListener("click", () => { renderHistory(); historyDialog.showModal(); });
+$("historyClose").addEventListener("click", () => historyDialog.close());
+$("historyClear").addEventListener("click", () => {
+  if (!gameHistory.length || !confirm("試合の履歴をすべて消しますか？（もとに戻せません）")) return;
+  gameHistory = [];
+  save(STORE_HISTORY, gameHistory);
+  renderHistory();
 });
 
 // ---------- settings ----------

@@ -1,7 +1,7 @@
 // Offline support: serve app files from cache, refresh them in the background.
 // Bump CACHE_NAME (and APP_VERSION in app.js) whenever files change.
 // Voice clips (voices/<id>/*.wav) are not listed here: they are cached when first played/preloaded.
-const CACHE_NAME = "pickle-score-v0.3.0";
+const CACHE_NAME = "pickle-score-v0.4.0";
 const FILES = [
   "./",
   "./index.html",
@@ -9,6 +9,13 @@ const FILES = [
   "./app.js",
   "./core.js",
   "./voice.js",
+  "./history.js",
+  "./img/dogs/ohagi.png",
+  "./img/dogs/kinako.png",
+  "./img/dogs/shiratama.png",
+  "./img/dogs/dorayaki.png",
+  "./img/dogs/yokan.png",
+  "./img/dogs/ohagi_face.png",
   "./voice-words.json",
   "./voices/voices.json",
   "./fonts/mplus-rounded-bold.woff2",

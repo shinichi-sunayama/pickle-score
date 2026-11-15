@@ -24,6 +24,9 @@
 <main class="app">
   <header class="top">
     <h1 class="logo">得点コール</h1>
+    <button id="historyBtn" class="pill-btn icon-only" type="button" aria-label="試合の履歴">
+      <svg class="gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M13 3a9 9 0 0 0-9 9H1l3.9 3.9L9 12H6a7 7 0 1 1 2.05 4.95l-1.42 1.42A9 9 0 1 0 13 3Zm-1 5v5l4.25 2.52.77-1.28-3.52-2.09V8H12Z"/></svg>
+    </button>
     <button id="rulesBtn" class="pill-btn" type="button" aria-label="設定を開く">
       <span id="rulesText">ダブルス・11点</span>
       <svg class="gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.2 4.7-.1-2.4 2-1.6-2-3.4-2.4.8a8 8 0 0 0-2.1-1.2L15.2 3h-4l-.5 2.4a8 8 0 0 0-2.1 1.2l-2.4-.8-2 3.4 2 1.6-.1 1.2.1 1.2-2 1.6 2 3.4 2.4-.8a8 8 0 0 0 2.1 1.2l.5 2.4h4l.5-2.4a8 8 0 0 0 2.1-1.2l2.4.8 2-3.4-2-1.6Z"/></svg>
@@ -34,12 +37,12 @@
     <div class="team t0" id="team0">
       <span class="team-name" id="teamName0">自分たち</span>
       <span class="team-score" id="teamScore0">0</span>
-      <span class="serve-mark" aria-hidden="true"><i class="ball"></i>サーブ</span>
+      <span class="serve-mark" aria-hidden="true"><img class="dogface" src="img/dogs/ohagi_face.png" alt="">サーブ</span>
     </div>
     <div class="team t1" id="team1">
       <span class="team-name" id="teamName1">相手</span>
       <span class="team-score" id="teamScore1">0</span>
-      <span class="serve-mark" aria-hidden="true"><i class="ball"></i>サーブ</span>
+      <span class="serve-mark" aria-hidden="true"><img class="dogface" src="img/dogs/ohagi_face.png" alt="">サーブ</span>
     </div>
   </section>
 
@@ -85,6 +88,7 @@
 <div id="over" class="over" hidden>
   <div class="over-card" role="dialog" aria-modal="true" aria-labelledby="overTitle">
     <div class="over-banner">ゲームセット！</div>
+    <img id="overDog" class="over-dog" src="img/dogs/ohagi.png" alt="">
     <div id="overTitle" class="over-title">自分たちの勝ち</div>
     <div id="overScore" class="over-score">11-7</div>
     <div class="over-actions">
@@ -157,9 +161,21 @@
     <div class="about">
       <p>ルールは USA Pickleball 公式ルールブック 2026年版にもとづきます。データはこの端末の中だけに保存し、外には送りません。</p>
       <p id="credits">フォント：M PLUS Rounded 1c（SIL Open Font License 1.1）</p>
-      <p>おはぎきなこ工房 <span id="version"></span></p>
+      <p class="kobo"><img src="img/dogs/ohagi.png" alt=""><img src="img/dogs/kinako.png" alt=""><span>おはぎきなこ工房 <span id="version"></span></span></p>
     </div>
   </form>
+</dialog>
+
+<dialog id="history" class="sheet">
+  <div class="sheet-head">試合の履歴</div>
+  <div class="history-body">
+    <p class="note">終わった試合と、途中でやめた試合を新しい順に最大30件まで、この端末に残します。試合を押すと、ラリーごとのコール（サーブ側の点から言う形）を確かめられます。</p>
+    <div id="historyList"></div>
+    <div class="sheet-actions">
+      <button id="historyClear" class="soft" type="button">履歴を消す</button>
+      <button id="historyClose" class="soft primary" type="button">閉じる</button>
+    </div>
+  </div>
 </dialog>
 
 <script type="module" src="app.js"></script>

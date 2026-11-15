@@ -115,13 +115,6 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   border-radius: 999px; padding: 2px 9px 2px 4px;
   box-shadow: 0 2px 0 var(--orange-lip);
 }
-.ball {
-  display: inline-block; width: 13px; height: 13px; border-radius: 50%;
-  background: radial-gradient(circle at 35% 35%, #c69a1f 0 1.3px, transparent 1.6px),
-              radial-gradient(circle at 68% 45%, #c69a1f 0 1.3px, transparent 1.6px),
-              radial-gradient(circle at 45% 72%, #c69a1f 0 1.3px, transparent 1.6px),
-              #ffe066;
-}
 .team.serving { border-color: var(--orange); background: var(--orange-soft); }
 .team.serving .serve-mark { visibility: visible; }
 
@@ -291,3 +284,51 @@ button { font: inherit; color: inherit; cursor: pointer; touch-action: manipulat
   .court { width: 96px; }
   .big-main { font-size: 1.6rem; }
 }
+
+/* ---- dogs (Ohagi Kinako Kobo) ---- */
+.dogface {
+  width: 18px; height: 18px; border-radius: 50%;
+  background: #fff; object-fit: cover; margin: -2px 0;
+  box-shadow: 0 0 0 1.5px #fff;
+}
+.over-dog {
+  display: block; height: 104px; width: auto; margin: 6px auto -4px;
+  animation: hop 0.9s ease-in-out infinite;
+  filter: drop-shadow(0 6px 4px rgba(74,52,38,0.18));
+}
+@keyframes hop {
+  0%, 100% { transform: translateY(0) rotate(-2deg); }
+  45% { transform: translateY(-14px) rotate(3deg); }
+  60% { transform: translateY(-10px) rotate(2deg); }
+}
+.kobo { display: flex; align-items: flex-end; gap: 4px; }
+.kobo img { height: 40px; width: auto; }
+.kobo span { margin-left: 6px; padding-bottom: 4px; }
+
+/* ---- history ---- */
+.pill-btn.icon-only { padding: 8px 10px; margin-left: auto; }
+.top { gap: 6px; }
+.history-body { padding: 0 14px 14px; }
+.hist-item { background: var(--card); border-radius: 16px; margin: 10px 0; box-shadow: 0 3px 0 var(--lip); }
+.hist-item summary {
+  list-style: none; cursor: pointer;
+  display: grid; grid-template-columns: 1fr auto; gap: 2px 8px; align-items: center;
+  padding: 10px 12px;
+}
+.hist-item summary::-webkit-details-marker { display: none; }
+.hist-when { font-size: 0.8rem; color: var(--muted); }
+.hist-rules { font-size: 0.8rem; color: var(--muted); text-align: right; }
+.hist-result { font-size: 1.05rem; font-weight: 900; }
+.hist-score { font-size: 1.5rem; font-weight: 900; text-align: right; font-variant-numeric: tabular-nums; color: var(--orange); }
+.hist-item.unfinished .hist-score { color: var(--muted); }
+.hist-rows { margin: 0; padding: 0 12px 12px; list-style: none; font-variant-numeric: tabular-nums; }
+.hist-rows li {
+  display: grid; grid-template-columns: 1.6em 4.2em 1fr; gap: 4px; align-items: center;
+  padding: 5px 0; border-top: 1px dashed var(--lip); font-size: 0.92rem;
+}
+.hist-rows .n { color: var(--muted); font-size: 0.8rem; }
+.hist-rows .c { font-weight: 900; }
+.hist-rows .r { font-size: 0.84rem; }
+.hist-rows .r.w { color: var(--green); }
+.hist-rows .r.l { color: var(--red); }
+.hist-empty { text-align: center; color: var(--muted); padding: 24px 0; }
