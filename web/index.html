@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>得点コール</title>
 <meta name="description" content="ピックルボールのサーブ前のコール（例 4-2-1）をボタンだけで数えて表示します。">
-<meta name="theme-color" content="#fbf7ef">
+<meta name="theme-color" content="#cfe9f7">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -14,111 +14,151 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="preload" href="fonts/mplus-rounded-bold.woff2" as="font" type="font/woff2" crossorigin>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
+<div class="bg" aria-hidden="true">
+  <span class="cloud c1"></span><span class="cloud c2"></span>
+</div>
 <main class="app">
   <header class="top">
-    <button id="rulesBtn" class="chip" type="button" aria-label="設定を開く"><span id="rulesText">ダブルス・11点</span><span aria-hidden="true"> ⚙︎</span></button>
-    <span id="rallyCount" class="muted">ラリー 0</span>
+    <h1 class="logo">得点コール</h1>
+    <button id="rulesBtn" class="pill-btn" type="button" aria-label="設定を開く">
+      <span id="rulesText">ダブルス・11点</span>
+      <svg class="gear" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 8.5a3.5 3.5 0 1 0 0 7 3.5 3.5 0 0 0 0-7Zm8.2 4.7-.1-2.4 2-1.6-2-3.4-2.4.8a8 8 0 0 0-2.1-1.2L15.2 3h-4l-.5 2.4a8 8 0 0 0-2.1 1.2l-2.4-.8-2 3.4 2 1.6-.1 1.2.1 1.2-2 1.6 2 3.4 2.4-.8a8 8 0 0 0 2.1 1.2l.5 2.4h4l.5-2.4a8 8 0 0 0 2.1-1.2l2.4.8 2-3.4-2-1.6Z"/></svg>
+    </button>
   </header>
 
   <section class="teams" aria-label="チームの点">
-    <div class="team" id="team0"><span class="team-name" id="teamName0">自分たち</span><span class="team-score" id="teamScore0">0</span><span class="serve-mark" aria-hidden="true">サーブ</span></div>
-    <div class="team" id="team1"><span class="team-name" id="teamName1">相手</span><span class="team-score" id="teamScore1">0</span><span class="serve-mark" aria-hidden="true">サーブ</span></div>
+    <div class="team t0" id="team0">
+      <span class="team-name" id="teamName0">自分たち</span>
+      <span class="team-score" id="teamScore0">0</span>
+      <span class="serve-mark" aria-hidden="true"><i class="ball"></i>サーブ</span>
+    </div>
+    <div class="team t1" id="team1">
+      <span class="team-name" id="teamName1">相手</span>
+      <span class="team-score" id="teamScore1">0</span>
+      <span class="serve-mark" aria-hidden="true"><i class="ball"></i>サーブ</span>
+    </div>
   </section>
 
-  <section class="callbox" aria-live="polite">
-    <div class="call-label">いま言うコール</div>
+  <section class="card callbox" aria-live="polite">
+    <div class="ribbon">いま言うコール</div>
     <div id="call" class="call">0-0-2</div>
-    <div id="event" class="event">&nbsp;</div>
+    <div class="event-row"><span id="event" class="event" hidden></span></div>
   </section>
 
-  <section class="serve" aria-label="サーブする位置">
-    <svg class="court" viewBox="0 0 120 84" aria-hidden="true">
-      <rect x="2" y="2" width="116" height="10" rx="2" class="net"/>
-      <rect id="courtLeft" x="4" y="18" width="54" height="62" rx="5" class="half"/>
-      <rect id="courtRight" x="62" y="18" width="54" height="62" rx="5" class="half"/>
-      <text id="labelLeft" x="31" y="56" class="half-label">左</text>
-      <text id="labelRight" x="89" y="56" class="half-label">右</text>
+  <section class="card serve" aria-label="サーブする位置">
+    <svg class="court" viewBox="0 0 132 92" aria-hidden="true">
+      <rect x="0" y="0" width="132" height="92" rx="10" class="court-bg"/>
+      <rect x="6" y="6" width="120" height="7" rx="3.5" class="net"/>
+      <rect x="10" y="17" width="112" height="70" rx="3" class="court-in"/>
+      <rect id="courtLeft" x="12" y="37" width="53" height="48" rx="3" class="box"/>
+      <rect id="courtRight" x="67" y="37" width="53" height="48" rx="3" class="box"/>
+      <line x1="10" y1="35" x2="122" y2="35" class="line"/>
+      <line x1="66" y1="35" x2="66" y2="87" class="line"/>
+      <text id="labelLeft" x="38.5" y="68" class="box-label">左</text>
+      <text id="labelRight" x="93.5" y="68" class="box-label">右</text>
+      <text x="66" y="29" class="kitchen-label">キッチン</text>
     </svg>
     <div class="serve-text">
-      <div><strong id="sideText" class="side">右</strong>から サーブ</div>
-      <div id="serverText" class="muted small">はじめに右にいた人</div>
-      <div class="muted tiny">（サーブする人から見て。上がネット）</div>
+      <div class="serve-main"><strong id="sideText" class="side">右</strong>から サーブ</div>
+      <div id="serverText" class="server-text">サーバー2：開始時に右の人</div>
+      <div class="hint">サーブする人から見た向き</div>
     </div>
   </section>
 
   <section class="buttons">
-    <button id="wonBtn" class="big won" type="button">サーブ側が<br><b>ラリーを取った</b></button>
-    <button id="lostBtn" class="big lost" type="button">サーブ側が<br><b>ラリーを落とした</b></button>
+    <button id="wonBtn" class="big won" type="button"><span class="big-sub">サーブ側が</span><span class="big-main">ラリーを取った</span></button>
+    <button id="lostBtn" class="big lost" type="button"><span class="big-sub">サーブ側が</span><span class="big-main">ラリーを落とした</span></button>
   </section>
 
   <footer class="bottom">
-    <button id="undoBtn" class="sub" type="button">↶ 1つ戻す</button>
-    <button id="speakBtn" class="sub" type="button" aria-pressed="false">🔈 読み上げ</button>
-    <button id="newBtn" class="sub" type="button">新しい試合</button>
+    <button id="undoBtn" class="soft" type="button"><span class="ico">↶</span>1つ戻す</button>
+    <button id="speakBtn" class="soft" type="button" aria-pressed="false"><span class="ico" id="speakIco">🔈</span><span id="speakText">読み上げ</span></button>
+    <button id="newBtn" class="soft" type="button"><span class="ico">↻</span>新しい試合</button>
   </footer>
+  <div id="rallyCount" class="rally-count">ラリー 0</div>
 </main>
 
 <div id="over" class="over" hidden>
   <div class="over-card" role="dialog" aria-modal="true" aria-labelledby="overTitle">
-    <div class="over-small">ゲーム終了</div>
+    <div class="over-banner">ゲームセット！</div>
     <div id="overTitle" class="over-title">自分たちの勝ち</div>
     <div id="overScore" class="over-score">11-7</div>
     <div class="over-actions">
-      <button id="overUndo" class="sub" type="button">↶ 1つ戻す</button>
-      <button id="overNew" class="sub primary" type="button">新しい試合</button>
+      <button id="overUndo" class="soft" type="button"><span class="ico">↶</span>1つ戻す</button>
+      <button id="overNew" class="soft primary" type="button">新しい試合</button>
     </div>
   </div>
 </div>
 
 <dialog id="settings" class="sheet">
   <form method="dialog" id="settingsForm">
-    <h2>設定</h2>
-    <fieldset>
-      <legend>人数</legend>
-      <label><input type="radio" name="players" value="doubles"> ダブルス</label>
-      <label><input type="radio" name="players" value="singles"> シングルス</label>
-    </fieldset>
-    <fieldset>
-      <legend>得点のしかた</legend>
-      <label><input type="radio" name="scoring" value="sideout"> サーブ側だけ得点（ふつう）</label>
-      <label><input type="radio" name="scoring" value="rally"> 毎ラリー得点</label>
-    </fieldset>
-    <fieldset>
-      <legend>勝ち</legend>
-      <label><input type="radio" name="target" value="11"> 11点</label>
-      <label><input type="radio" name="target" value="15"> 15点</label>
-      <label><input type="radio" name="target" value="21"> 21点</label>
-      <div class="row-gap"></div>
-      <label><input type="radio" name="winBy" value="2"> 2点差（ふつう）</label>
-      <label><input type="radio" name="winBy" value="1"> 1点差</label>
-    </fieldset>
-    <fieldset>
-      <legend>最初にサーブするのは</legend>
-      <label><input type="radio" name="firstServer" value="0"> 自分たち</label>
-      <label><input type="radio" name="firstServer" value="1"> 相手</label>
-    </fieldset>
-    <p class="note">上の設定を変えると、新しい試合になります。</p>
+    <div class="sheet-head">設定</div>
 
-    <fieldset>
-      <legend>読み上げ</legend>
-      <label><input type="radio" name="voice" value="off"> なし</label>
-      <label><input type="radio" name="voice" value="ja"> 日本語</label>
-      <label><input type="radio" name="voice" value="en"> 英語</label>
-    </fieldset>
-    <fieldset>
-      <legend>そのほか</legend>
-      <label><input type="checkbox" name="vibrate"> ボタンを押したら振動</label>
-      <label><input type="checkbox" name="wakeLock"> 画面を消さない</label>
-      <p id="deviceNote" class="note"></p>
-    </fieldset>
-    <div class="sheet-actions">
-      <button value="cancel" class="sub" type="submit">やめる</button>
-      <button value="save" class="sub primary" type="submit">決定</button>
+    <div class="group">
+      <div class="group-title">人数</div>
+      <div class="seg">
+        <label><input type="radio" name="players" value="doubles"><span>ダブルス</span></label>
+        <label><input type="radio" name="players" value="singles"><span>シングルス</span></label>
+      </div>
     </div>
-    <p class="note tiny">ルールは USA Pickleball 公式ルールブック 2026年版にもとづきます。データはこの端末の中だけに保存し、外には送りません。<br>おはぎきなこ工房 <span id="version"></span></p>
+    <div class="group">
+      <div class="group-title">得点のしかた</div>
+      <div class="seg">
+        <label><input type="radio" name="scoring" value="sideout"><span>サーブ側だけ<small>ふつう</small></span></label>
+        <label><input type="radio" name="scoring" value="rally"><span>毎ラリー</span></label>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">勝ち</div>
+      <div class="seg">
+        <label><input type="radio" name="target" value="11"><span>11点</span></label>
+        <label><input type="radio" name="target" value="15"><span>15点</span></label>
+        <label><input type="radio" name="target" value="21"><span>21点</span></label>
+      </div>
+      <div class="seg">
+        <label><input type="radio" name="winBy" value="2"><span>2点差<small>ふつう</small></span></label>
+        <label><input type="radio" name="winBy" value="1"><span>1点差</span></label>
+      </div>
+    </div>
+    <div class="group">
+      <div class="group-title">最初にサーブするのは</div>
+      <div class="seg">
+        <label><input type="radio" name="firstServer" value="0"><span>自分たち</span></label>
+        <label><input type="radio" name="firstServer" value="1"><span>相手</span></label>
+      </div>
+      <p class="note">ここまでの設定を変えると、新しい試合になります。</p>
+    </div>
+
+    <div class="group">
+      <div class="group-title">読み上げの声</div>
+      <div class="seg wrap" id="voiceChoices">
+        <label><input type="radio" name="voice" value="off"><span>なし</span></label>
+        <label><input type="radio" name="voice" value="ja"><span>端末の声</span></label>
+        <label><input type="radio" name="voice" value="en"><span>英語の声</span></label>
+      </div>
+      <p class="note">数字は英語で読みます（0-0-2 は「ゼロ・ゼロ・ツー」）。</p>
+    </div>
+    <div class="group">
+      <div class="group-title">そのほか</div>
+      <label class="check"><input type="checkbox" name="vibrate"><span>ボタンを押したら振動</span></label>
+      <label class="check"><input type="checkbox" name="wakeLock"><span>画面を消さない</span></label>
+      <p id="deviceNote" class="note"></p>
+    </div>
+
+    <div class="sheet-actions">
+      <button value="cancel" class="soft" type="submit">やめる</button>
+      <button value="save" class="soft primary" type="submit">決定</button>
+    </div>
+
+    <div class="about">
+      <p>ルールは USA Pickleball 公式ルールブック 2026年版にもとづきます。データはこの端末の中だけに保存し、外には送りません。</p>
+      <p id="credits">フォント：M PLUS Rounded 1c（SIL Open Font License 1.1）</p>
+      <p>おはぎきなこ工房 <span id="version"></span></p>
+    </div>
   </form>
 </dialog>
 

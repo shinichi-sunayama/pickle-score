@@ -1,16 +1,17 @@
-// Screen logic. All scoring rules live in core.js.
+// Screen logic. All scoring rules live in core.js; reading aloud lives in voice.js.
 import {
   DEFAULT_CONFIG, normalizeConfig, createMatch, matchState, recordRally, undoRally, canUndo,
   scoreCall, serveSide,
 } from "./core.js";
+import { callTokens, createSpeaker } from "./voice.js";
 
-const APP_VERSION = "0.1.0"; // keep in sync with CACHE_NAME in sw.js
+const APP_VERSION = "0.2.0"; // keep in sync with CACHE_NAME in sw.js
 const STORE_MATCH = "pickle-score.match";
 const STORE_PREFS = "pickle-score.prefs";
 const TEAM_NAMES = ["自分たち", "相手"];
 const TAP_GUARD_MS = 400; // ignore a second tap this soon (prevents double counting)
 
-const DEFAULT_PREFS = { voice: "off", vibrate: true, wakeLock: true };
+const DEFAULT_PREFS = { voice: "off", lastVoice: "ja", vibrate: true, wakeLock: true };
 
 const $ = (id) => document.getElementById(id);
 
@@ -37,6 +38,8 @@ function loadMatch() {
 let match = loadMatch();
 let prefs = { ...DEFAULT_PREFS, ...(load(STORE_PREFS) || {}) };
 let lastTap = 0;
+const speaker = createSpeaker();
+speaker.setMode(prefs.voice);
 
 // ---------- rendering ----------
 function rulesLabel(c) {
@@ -52,6 +55,14 @@ function serverLabel(s) {
   return s.serverNumber ? `サーバー${s.serverNumber}：${who}` : `サーバー：${who}`;
 }
 
+function voiceName(id) {
+  if (id === "off") return "なし";
+  if (id === "ja") return "端末の声";
+  if (id === "en") return "英語の声";
+  const v = speaker.voices.find((x) => x.id === id);
+  return v ? v.name : "端末の声";
+}
+
 function render(eventText = "", eventKind = "") {
   const s = matchState(match);
   const c = s.config;
@@ -65,79 +76,58 @@ function render(eventText = "", eventKind = "") {
     $(`team${t}`).classList.toggle("serving", s.winner === null && s.serving === t);
   }
 
+  const callEl = $("call");
   const call = scoreCall(s);
-  $("call").textContent = call;
-  $("call").classList.toggle("long", call.length > 6);
+  callEl.textContent = call;
+  for (const n of [6, 7, 8]) callEl.classList.toggle(`len${n}`, Math.min(call.length, 8) === n);
+  if (eventText) { callEl.classList.remove("bump"); void callEl.offsetWidth; callEl.classList.add("bump"); }
 
   const ev = $("event");
-  ev.textContent = eventText || " ";
-  ev.classList.toggle("change", eventKind === "change");
+  ev.hidden = !eventText;
+  ev.textContent = eventText;
+  ev.className = `event ${eventKind}`;
+  if (eventText) { ev.style.animation = "none"; void ev.offsetWidth; ev.style.animation = ""; }
 
-  const side = serveSide(s);
-  const right = side === "right";
+  const right = serveSide(s) === "right";
   $("sideText").textContent = right ? "右" : "左";
   $("courtRight").classList.toggle("on", right);
   $("courtLeft").classList.toggle("on", !right);
   $("labelRight").classList.toggle("on", right);
   $("labelLeft").classList.toggle("on", !right);
   $("serverText").textContent = serverLabel(s);
+  $("serverText").hidden = !serverLabel(s);
 
   const over = s.winner !== null;
   $("wonBtn").disabled = over;
   $("lostBtn").disabled = over;
   $("undoBtn").disabled = !canUndo(match);
 
-  $("speakBtn").setAttribute("aria-pressed", String(prefs.voice !== "off"));
-  $("speakBtn").textContent = prefs.voice === "off" ? "🔈 読み上げ" : "🔊 読み上げ";
+  const on = prefs.voice !== "off";
+  $("speakBtn").setAttribute("aria-pressed", String(on));
+  $("speakIco").textContent = on ? "🔊" : "🔈";
+  $("speakText").textContent = on ? voiceName(prefs.voice) : "読み上げ";
 
-  const overBox = $("over");
   if (over) {
     const w = s.winner;
     $("overTitle").textContent = `${TEAM_NAMES[w]}の勝ち`;
     $("overScore").textContent = `${s.score[w]}-${s.score[1 - w]}`;
-    overBox.hidden = false;
-  } else {
-    overBox.hidden = true;
   }
+  $("over").hidden = !over;
 }
 
 // ---------- what just happened (for the small message and voice) ----------
 function describeChange(prev, next) {
-  if (next.winner !== null) return { text: "ゲーム終了", kind: "change", ja: "ゲーム終了", en: "game" };
+  if (next.winner !== null) return { text: "ゲームセット", kind: "change", phrase: "gameset" };
   if (next.serving !== prev.serving) {
     const text = next.score[next.serving] !== prev.score[next.serving]
       ? "レシーブ側に得点・サーブ交代" : "サイドアウト（サーブ交代）";
-    return { text, kind: "change", ja: "サイドアウト", en: "side out" };
+    return { text, kind: "change", phrase: "sideout" };
   }
-  if (next.serverNumber !== prev.serverNumber) {
-    return { text: "2人目のサーバーへ", kind: "change", ja: "セカンドサーバー", en: "second server" };
-  }
-  return { text: "得点！", kind: "", ja: "", en: "" };
+  if (next.serverNumber !== prev.serverNumber) return { text: "2人目のサーバーへ", kind: "change", phrase: "second" };
+  return { text: "得点！", kind: "", phrase: "" };
 }
 
-// ---------- voice / vibration / screen ----------
-function speak(prefix, state) {
-  if (prefs.voice === "off" || !("speechSynthesis" in window)) return;
-  const nums = scoreCall(state).split("-");
-  let text;
-  if (state.winner !== null) {
-    const w = state.winner;
-    text = prefs.voice === "ja"
-      ? `ゲーム終了。${state.score[w]}対${state.score[1 - w]}`
-      : `game. ${state.score[w]} to ${state.score[1 - w]}`;
-  } else {
-    text = prefs.voice === "ja" ? nums.join("、") : nums.join(", ");
-    if (prefix) text = `${prefix}。${text}`;
-  }
-  try {
-    speechSynthesis.cancel();
-    const u = new SpeechSynthesisUtterance(text);
-    u.lang = prefs.voice === "ja" ? "ja-JP" : "en-US";
-    u.rate = prefs.voice === "ja" ? 1.05 : 1.0;
-    speechSynthesis.speak(u);
-  } catch { /* speech not available */ }
-}
-
+// ---------- vibration / screen ----------
 const canVibrate = typeof navigator.vibrate === "function";
 function buzz(pattern) {
   if (prefs.vibrate && canVibrate) { try { navigator.vibrate(pattern); } catch { /* ignore */ } }
@@ -167,6 +157,7 @@ function tapAllowed() {
 }
 
 function play(servingSideWon) {
+  speaker.unlock();
   if (!tapAllowed()) return;
   const prev = matchState(match);
   if (prev.winner !== null) return;
@@ -176,63 +167,91 @@ function play(servingSideWon) {
   const ev = describeChange(prev, next);
   render(ev.text, ev.kind);
   buzz(ev.kind === "change" ? [40, 60, 40] : 30);
-  speak(prefs.voice === "ja" ? ev.ja : ev.en, next);
+  speaker.say(callTokens(next, ev.phrase));
   updateWakeLock();
 }
 
 function undo() {
+  speaker.unlock();
   if (!canUndo(match)) return;
   match = undoRally(match);
   save(STORE_MATCH, match);
-  render("1つ戻しました", "");
+  render("1つ戻しました", "info");
   buzz(20);
-  speak("", matchState(match));
+  speaker.say(callTokens(matchState(match)));
 }
 
-function newMatch(config = match.config, ask = true) {
-  if (ask && canUndo(match) && matchState(match).winner === null
-      && !confirm("いまの試合を終えて、新しい試合を始めますか？")) return false;
+function startNewMatch(config) {
   match = createMatch(config);
   save(STORE_MATCH, match);
-  render("新しい試合", "");
-  speak("", matchState(match));
-  return true;
+  render("新しい試合", "info");
+  speaker.say(callTokens(matchState(match)));
+}
+
+function newMatchAsked() {
+  speaker.unlock();
+  if (canUndo(match) && matchState(match).winner === null
+      && !confirm("いまの試合を終えて、新しい試合を始めますか？")) return;
+  startNewMatch(match.config);
 }
 
 $("wonBtn").addEventListener("click", () => play(true));
 $("lostBtn").addEventListener("click", () => play(false));
 $("undoBtn").addEventListener("click", undo);
 $("overUndo").addEventListener("click", undo);
-$("newBtn").addEventListener("click", () => newMatch());
-$("overNew").addEventListener("click", () => newMatch(match.config, false));
+$("newBtn").addEventListener("click", newMatchAsked);
+$("overNew").addEventListener("click", () => { speaker.unlock(); startNewMatch(match.config); });
 $("speakBtn").addEventListener("click", () => {
-  prefs.voice = prefs.voice === "off" ? "ja" : "off";
+  speaker.unlock();
+  if (prefs.voice === "off") prefs.voice = prefs.lastVoice || "ja";
+  else { prefs.lastVoice = prefs.voice; prefs.voice = "off"; }
+  speaker.setMode(prefs.voice);
   save(STORE_PREFS, prefs);
   render();
-  if (prefs.voice !== "off") speak("", matchState(match));
+  speaker.say(callTokens(matchState(match)));
 });
 
 // ---------- settings ----------
 const dialog = $("settings");
 const form = $("settingsForm");
 
+function radios(name) {
+  const r = form.elements[name];
+  return r instanceof RadioNodeList ? [...r] : [r];
+}
 function setRadio(name, value) {
-  for (const el of form.elements[name]) el.checked = el.value === String(value);
+  for (const el of radios(name)) el.checked = el.value === String(value);
 }
 function getRadio(name) {
-  for (const el of form.elements[name]) if (el.checked) return el.value;
-  return null;
+  const el = radios(name).find((e) => e.checked);
+  return el ? el.value : null;
 }
 
 function deviceNote() {
   const notes = [];
   if (!canVibrate) notes.push("この端末のブラウザは振動に対応していません（iPhone の Safari は非対応です）。");
   if (!("wakeLock" in navigator)) notes.push("この端末のブラウザは「画面を消さない」に対応していません。");
-  if (!("speechSynthesis" in window)) notes.push("この端末のブラウザは読み上げに対応していません。");
   return notes.join(" ");
 }
 
+function addVoiceChoices() {
+  const box = $("voiceChoices");
+  for (const v of speaker.voices) {
+    if (box.querySelector(`input[value="${v.id}"]`)) continue;
+    const label = document.createElement("label");
+    label.innerHTML = `<input type="radio" name="voice"><span></span>`;
+    label.querySelector("input").value = v.id;
+    label.querySelector("span").textContent = v.name;
+    box.append(label);
+  }
+  const credits = ["フォント：M PLUS Rounded 1c（SIL Open Font License 1.1）"];
+  for (const v of speaker.voices) credits.push(v.credit);
+  $("credits").textContent = credits.join(" ／ ");
+}
+
 $("rulesBtn").addEventListener("click", () => {
+  speaker.unlock();
+  addVoiceChoices();
   const c = match.config;
   setRadio("players", c.players);
   setRadio("scoring", c.scoring);
@@ -240,6 +259,7 @@ $("rulesBtn").addEventListener("click", () => {
   setRadio("winBy", c.winBy);
   setRadio("firstServer", c.firstServer);
   setRadio("voice", prefs.voice);
+  if (!getRadio("voice")) setRadio("voice", "ja");
   form.elements.vibrate.checked = prefs.vibrate;
   form.elements.wakeLock.checked = prefs.wakeLock;
   $("deviceNote").textContent = deviceNote();
@@ -247,13 +267,24 @@ $("rulesBtn").addEventListener("click", () => {
   dialog.showModal();
 });
 
+// Preview a voice when it is picked.
+$("voiceChoices").addEventListener("change", (e) => {
+  if (e.target.name !== "voice") return;
+  speaker.unlock();
+  speaker.setMode(e.target.value);
+  speaker.say(callTokens(matchState(match)));
+});
+
 dialog.addEventListener("close", () => {
-  if (dialog.returnValue !== "save") return;
+  if (dialog.returnValue !== "save") { speaker.setMode(prefs.voice); return; }
+  const voice = getRadio("voice") || "off";
   prefs = {
-    voice: getRadio("voice") || "off",
+    voice,
+    lastVoice: voice !== "off" ? voice : prefs.lastVoice,
     vibrate: form.elements.vibrate.checked,
     wakeLock: form.elements.wakeLock.checked,
   };
+  speaker.setMode(prefs.voice);
   save(STORE_PREFS, prefs);
   updateWakeLock();
 
@@ -264,11 +295,10 @@ dialog.addEventListener("close", () => {
     winBy: Number(getRadio("winBy")),
     firstServer: Number(getRadio("firstServer")),
   });
-  const changed = JSON.stringify(config) !== JSON.stringify(match.config);
-  if (changed) {
+  if (JSON.stringify(config) !== JSON.stringify(match.config)) {
     const started = canUndo(match) && matchState(match).winner === null;
     if (!started || confirm("ルールを変えると新しい試合になります。よろしいですか？")) {
-      newMatch(config, false);
+      startNewMatch(config);
       return;
     }
   }
@@ -278,6 +308,7 @@ dialog.addEventListener("close", () => {
 // ---------- start ----------
 render();
 updateWakeLock();
+speaker.ready.then(() => { speaker.setMode(prefs.voice); render(); });
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {

@@ -3,6 +3,7 @@ import {
   newGame, playRally, replay, scoreCall, serveSide, normalizeConfig,
   createMatch, matchState, recordRally, undoRally, canUndo,
 } from "../web/core.js";
+import { callTokens } from "../web/voice.js";
 
 function describeState(s) {
   return `${scoreCall(s)} ${serveSide(s) === "right" ? "R" : "L"} T${s.serving}`;
@@ -79,6 +80,12 @@ const unitTests = [
     const back = JSON.parse(JSON.stringify(m));
     eq(scoreCall(matchState(back)), scoreCall(matchState(m)), "same call");
     eq(back.config.target, 15, "config kept");
+  }],
+  ["voice: words to read for a call", () => {
+    eq(callTokens(newGame()), [0, 0, 2], "start is zero-zero-two");
+    eq(callTokens(replay({}, "L"), "sideout"), ["sideout", 0, 0, 1], "side out then call");
+    eq(callTokens(replay({ players: "singles" }, "WW")), [2, 0], "singles");
+    eq(callTokens(replay({ players: "singles" }, "LWWWWWWWWWWW")), ["gameset", 11, 0], "game over: winner first");
   }],
   ["normalizeConfig rejects bad values", () => {
     throws(() => normalizeConfig({ players: "triples" }), "players");

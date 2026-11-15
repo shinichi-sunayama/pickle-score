@@ -8,11 +8,13 @@
 
 ## 構成
 - `web/core.js` … 数え方のルール（画面なし・純粋な関数）。ルール変更はここだけ。
-- `web/app.js` `web/index.html` `web/style.css` … 画面。
+- `web/app.js` `web/index.html` `web/style.css` … 画面（見た目はほえほえチワ隊に寄せる：M PLUS Rounded、クリーム＋空色、ふちのある立体ボタン）。
+- `web/voice.js` `web/voice-words.json` … 読み上げ。数字は英語（0＝ゼロ）。VOICEVOX の声は `web/voices/<id>/*.wav` と `voices.json`（`tools/make_voices.py` で作成、PC で VOICEVOX を起動しておく）。規約とクレジットは `docs/voices.md`。
+- `web/fonts/` … 文字を減らしたフォント。**画面に新しい日本語を足したら `tools/make_font.py` を実行し直す**（元フォントは chiwa-survivor の `Assets/_Game/Resources/Fonts/MPLUSRounded1c-Bold.ttf`）。
 - `web/sw.js` … オフライン用。**ファイルを変えたら `CACHE_NAME`（sw.js）と `APP_VERSION`（app.js）を一緒に上げる。** sw.js の FILES に新しいファイルを足すのも忘れない。
 - `tests/cases.json` … ルールの具体例（手計算の期待値）。Web と将来の Swift で共通。
 - `tests/core.test.js` … テスト本体。ブラウザなら `tests/index.html`、Node なら `node tests/run-node.mjs`。
-- `tools/make_icons.py` … アイコン作成（Pillow）。
+- `tools/make_icons.py` … アイコン作成（Pillow）。`tools/make_font.py` と `tools/make_voices.py` は fonttools・brotli／VOICEVOX が必要。
 - `docs/rules.md`（出典）、`docs/decisions.md`（決定ログ）、`docs/mac-setup.md`（B の準備）。
 
 ## 動かし方（Windows）
