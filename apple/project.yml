@@ -41,7 +41,7 @@ targets:
     info:
       path: Generated/iOS-Info.plist
       properties:
-        CFBundleDisplayName: 得点コール
+        CFBundleDisplayName: おはぎコール
         CFBundleDevelopmentRegion: ja
         ITSAppUsesNonExemptEncryption: false
         UILaunchScreen: {}
@@ -74,7 +74,7 @@ targets:
     info:
       path: Generated/Watch-Info.plist
       properties:
-        CFBundleDisplayName: 得点コール
+        CFBundleDisplayName: おはぎコール
         CFBundleDevelopmentRegion: ja
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.ohagikinakokobo.picklecall

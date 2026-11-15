@@ -43,7 +43,7 @@ struct ContentView: View {
 
     private var header: some View {
         HStack(spacing: 8) {
-            Text("得点コール")
+            Text("おはぎコール")
                 .font(Theme.font(26))
                 .foregroundStyle(Theme.orange)
                 .shadow(color: .white, radius: 0, x: 2, y: 2)

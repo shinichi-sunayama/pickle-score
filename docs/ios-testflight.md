@@ -7,7 +7,7 @@ Mac がなくても、GitHub のクラウドの Mac で組み立て・署名し�
 | 段階 | 内容 | だれが | 状態 |
 |---|---|---|---|
 | 1 | Swift のアプリを書く（`apple/`） | Claude | 済（2026-11-15、署名なしの組み立て成功：Xcode 26.6、run 43681472505） |
-| 2 | バンドル ID を 2 つ登録し、App Store Connect にアプリを作る | ユーザー | |
+| 2 | バンドル ID を 2 つ登録し、App Store Connect にアプリを作る | ユーザー | 済（2026-11-15） |
 | 3 | このリポジトリの GitHub の Secrets に鍵を 4 つ入れる | ユーザー | |
 | 4 | クラウドで組み立て・署名して App Store Connect に上げる | Claude | |
 | 5 | TestFlight で iPhone に入れ、Watch にも入れて試す | ユーザー | |
@@ -25,7 +25,7 @@ Mac がなくても、GitHub のクラウドの Mac で組み立て・署名し�
 1. https://appstoreconnect.apple.com/ →「アプリ」→ 左上の「＋」→「新規 App」
 2. 次のように入れて「作成」
    - プラットフォーム：iOS
-   - 名前：`ピックルボール得点コール`（ほかのアプリと名前がかぶって使えないときは `得点コール - おはぎきなこ工房` など。あとで変えられます）
+   - 名前：`おはぎのピックルボールコール`（ホーム画面の名前は「おはぎコール」）
    - 主言語：日本語
    - バンドル ID：`com.ohagikinakokobo.picklecall`
    - SKU：`picklecall`
@@ -58,10 +58,10 @@ gh workflow run apple.yml -R shinichi-sunayama/pickle-score -f upload=true
 - 結果：https://github.com/shinichi-sunayama/pickle-score/actions/workflows/apple.yml
 
 ## 5. TestFlight で試す（ユーザー）
-1. 上がってから数分〜数十分で、App Store Connect の「ピックルボール得点コール」→「TestFlight」にビルドが出る（「処理中」が消えるまで待つ）
+1. 上がってから数分〜数十分で、App Store Connect の「おはぎのピックルボールコール」→「TestFlight」にビルドが出る（「処理中」が消えるまで待つ）
 2. 左の「内部テスト」の「＋」でグループを作り（名前は何でもよい）、自分をテスターに入れて、ビルドを追加
-3. iPhone の「TestFlight」アプリ（ほかの作品で使っているもの）→「ピックルボール得点コール」→「インストール」
-4. Apple Watch には、iPhone の「Watch」アプリ →「マイウォッチ」→ 下のほうの「得点コール」→「インストール」（自動で入ることもある）
+3. iPhone の「TestFlight」アプリ（ほかの作品で使っているもの）→「おはぎのピックルボールコール」→「インストール」
+4. Apple Watch には、iPhone の「Watch」アプリ →「マイウォッチ」→ 下のほうの「おはぎコール」→「インストール」（自動で入ることもある）
 
 ## 気をつけること
 - バンドル ID は一度使うと変えられない
