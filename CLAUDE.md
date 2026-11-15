@@ -31,6 +31,7 @@
 
 ## 公開
 - https://shinichi-sunayama.github.io/pickle-score/ （リポジトリ shinichi-sunayama/pickle-score、公開）
+- App Store（1.0.0、2026-11-16 公開、無料、iPhone＋Watch）：https://apps.apple.com/jp/app/id6835014633 。次の更新は 1.1（候補：iPhone と Watch の履歴の同期）。
 - `shinichi-sunayama.github.io` リポジトリ（app-ads.txt・工房サイト）には絶対にさわらない。
 
 ## 守ること
