@@ -6,7 +6,7 @@ import {
 import { callTokens, createSpeaker } from "./voice.js";
 import { recordFromMatch, upsertHistory, removeFromHistory, timeline, sanitizeHistory } from "./history.js";
 
-const APP_VERSION = "0.4.0"; // keep in sync with CACHE_NAME in sw.js
+const APP_VERSION = "0.4.1"; // keep in sync with CACHE_NAME in sw.js
 const STORE_MATCH = "pickle-score.match";
 const STORE_PREFS = "pickle-score.prefs";
 const STORE_HISTORY = "pickle-score.history";
