@@ -44,14 +44,25 @@ struct WatchMenuView: View {
                 }
             }
 
-            Section("読み上げ・振動") {
+            Section {
                 Picker("声", selection: Binding(get: { store.voice }, set: { store.setVoice($0); store.previewVoice($0) })) {
                     Text("なし").tag("off")
                     Text("端末の声").tag("ja")
                     Text("英語の声").tag("en")
                     ForEach(store.voices) { v in Text(v.name).tag(v.id) }
                 }
+                if store.voice != "off" {
+                    Button {
+                        store.previewVoice(store.voice)
+                    } label: {
+                        Label("声を試す", systemImage: "speaker.wave.2.fill")
+                    }
+                }
                 Toggle("振動", isOn: $store.haptics)
+            } header: {
+                Text("読み上げ・振動")
+            } footer: {
+                Text("鳴らないときは、消音モード（コントロールセンターのベル）を外し、音量（設定→サウンドと触覚）を上げてください。")
             }
 
             Section {

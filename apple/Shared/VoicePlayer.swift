@@ -58,8 +58,19 @@ final class VoicePlayer: NSObject, AVAudioPlayerDelegate {
         // Play even when the silent switch is on, and lower music while speaking.
         try? AVAudioSession.sharedInstance().setCategory(.playback, mode: .spokenAudio, options: [.duckOthers])
         try? AVAudioSession.sharedInstance().setActive(true)
+        #elseif os(watchOS)
+        // Short clips while the app is in front play through the Watch's own speaker.
+        // Without an active playback session nothing is heard (found on the first TestFlight build).
+        let session = AVAudioSession.sharedInstance()
+        if !sessionReady {
+            try? session.setCategory(.playback, mode: .default, policy: .default, options: [])
+            sessionReady = true
+        }
+        try? session.setActive(true)
         #endif
     }
+
+    private var sessionReady = false
 
     func stop() {
         queue.removeAll()
