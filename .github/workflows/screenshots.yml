@@ -1,0 +1,33 @@
+# App Store screenshots: run the iPhone and Watch apps in simulators on a GitHub-hosted Mac and save
+# the screens as an artifact (download with: gh run download <run id> -n screenshots -D docs/store/screenshots).
+# Free for this public repository. Run by hand: gh workflow run screenshots.yml
+name: Screenshots
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    shell: bash
+
+jobs:
+  shots:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install XcodeGen
+        run: brew install xcodegen
+      - name: Make the Xcode project
+        run: |
+          bash tools/make_apple_assets.sh
+          xcodegen generate --spec apple/project.yml
+      - name: Take screenshots
+        run: bash tools/take_screenshots.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: shots

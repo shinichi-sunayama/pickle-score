@@ -5,6 +5,8 @@ struct HistoryView: View {
     @EnvironmentObject var store: GameStore
     @Environment(\.dismiss) private var dismiss
     @State private var confirmClear = false
+    // The screenshot shows the short game opened.
+    @State private var opened: Set<String> = ScreenshotMode.isOn ? ["shot-2"] : []
 
     private static let formatter: DateFormatter = {
         let f = DateFormatter()
@@ -21,7 +23,10 @@ struct HistoryView: View {
                         Text("まだ試合の記録はありません").foregroundStyle(Theme.muted)
                     }
                     ForEach(store.history) { r in
-                        DisclosureGroup {
+                        DisclosureGroup(isExpanded: Binding(
+                            get: { opened.contains(r.id) },
+                            set: { if $0 { opened.insert(r.id) } else { opened.remove(r.id) } }
+                        )) {
                             ForEach(History.timeline(r.config, r.results), id: \.n) { row in
                                 HStack(spacing: 8) {
                                     Text(row.result == nil ? "" : "\(row.n)").font(.caption).foregroundStyle(Theme.muted)

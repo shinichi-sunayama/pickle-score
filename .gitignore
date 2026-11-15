@@ -12,3 +12,5 @@ apple/PickleCore/.build/
 apple/*.xcodeproj/
 apple/build/
 apple/Generated/
+shots/
+derived-sim/

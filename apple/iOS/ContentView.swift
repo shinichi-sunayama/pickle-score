@@ -37,6 +37,11 @@ struct ContentView: View {
             Button("始める") { store.newGame() }
             Button("やめる", role: .cancel) {}
         }
+        .onAppear {
+            guard ScreenshotMode.isOn else { return }
+            if ScreenshotMode.screen == "history" { showHistory = true }
+            if ScreenshotMode.screen == "settings" { showSettings = true }
+        }
     }
 
     // MARK: parts

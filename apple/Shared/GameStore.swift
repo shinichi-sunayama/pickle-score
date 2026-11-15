@@ -54,6 +54,19 @@ final class GameStore: ObservableObject {
         haptics = p.haptics
         lastVoice = p.lastVoice
         player.mode = p.voice
+
+        // Store screenshots (simulator only, set by launch arguments): show a prepared scene, stay quiet.
+        if let results = ScreenshotMode.value("shotResults") {
+            let shot = Match(id: "shot-0", results: results)
+            match = shot
+            state = shot.state
+            history = ScreenshotMode.sampleHistory()
+            if !results.isEmpty, let prev = try? Rules.replay(shot.config, String(results.dropLast())) {
+                event = GameEvent.describe(prev: prev, next: shot.state, serial: 1)
+            }
+            if let v = ScreenshotMode.value("shotVoice") { voice = v }
+            player.mode = "off"
+        }
     }
 
     var voices: [VoicePlayer.VoiceInfo] { player.voices }
