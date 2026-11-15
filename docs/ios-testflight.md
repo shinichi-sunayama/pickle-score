@@ -8,8 +8,8 @@ Mac がなくても、GitHub のクラウドの Mac で組み立て・署名し�
 |---|---|---|---|
 | 1 | Swift のアプリを書く（`apple/`） | Claude | 済（2026-11-15、署名なしの組み立て成功：Xcode 26.6、run 43681472505） |
 | 2 | バンドル ID を 2 つ登録し、App Store Connect にアプリを作る | ユーザー | 済（2026-11-15） |
-| 3 | このリポジトリの GitHub の Secrets に鍵を 4 つ入れる | ユーザー | |
-| 4 | クラウドで組み立て・署名して App Store Connect に上げる | Claude | |
+| 3 | このリポジトリの GitHub の Secrets に鍵を 4 つ入れる | ユーザー | 済（2026-11-15） |
+| 4 | クラウドで組み立て・署名して App Store Connect に上げる | Claude | 済（2026-11-15、v0.1.0 ビルド 3、run 43682380554、約4分） |
 | 5 | TestFlight で iPhone に入れ、Watch にも入れて試す | ユーザー | |
 
 ## 2. バンドル ID を登録して、アプリを作る（ユーザー）
@@ -64,5 +64,6 @@ gh workflow run apple.yml -R shinichi-sunayama/pickle-score -f upload=true
 4. Apple Watch には、iPhone の「Watch」アプリ →「マイウォッチ」→ 下のほうの「おはぎコール」→「インストール」（自動で入ることもある）
 
 ## 気をつけること
+- ブラウザで GitHub の設定ページが 404 になるときは、shinichi-sunayama でログインしていない（ログインし直すと開ける）
 - バンドル ID は一度使うと変えられない
 - Watch アプリは Watch だけで数えられる（iPhone を持ってコートに入らなくてよい）。iPhone と Watch の数えはまだ別々（同期はあとで検討）
