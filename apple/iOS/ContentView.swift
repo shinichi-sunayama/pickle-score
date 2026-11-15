@@ -49,7 +49,9 @@ struct ContentView: View {
     private var header: some View {
         HStack(spacing: 8) {
             Text("おはぎコール")
-                .font(Theme.font(26))
+                .font(Theme.font(24))
+                .lineLimit(1)
+                .minimumScaleFactor(0.6)
                 .foregroundStyle(Theme.orange)
                 .shadow(color: .white, radius: 0, x: 2, y: 2)
                 .shadow(color: .white, radius: 0, x: -2, y: -2)

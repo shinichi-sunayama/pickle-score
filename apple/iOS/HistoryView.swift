@@ -48,7 +48,7 @@ struct HistoryView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .confirmationAction) { Button("閉じる") { dismiss() } }
-                ToolbarItem(placement: .bottomBar) {
+                ToolbarItem(placement: .cancellationAction) {
                     Button("履歴を消す", role: .destructive) { confirmClear = true }.disabled(store.history.isEmpty)
                 }
             }
