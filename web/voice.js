@@ -24,6 +24,7 @@ export function createSpeaker() {
   let ctx = null;
   const buffers = new Map(); // "voiceId/name" -> AudioBuffer
   let playing = [];
+  let requestId = 0;
 
   const ready = Promise.all([
     fetch("voice-words.json").then((r) => r.json()).then((j) => { words = j; }).catch(() => {}),
@@ -42,9 +43,15 @@ export function createSpeaker() {
     return tokens.every((t) => buffers.has(`${m}/${clipName(t)}`));
   }
 
-  async function loadClip(m, name) {
+  const pending = new Map(); // "voiceId/name" -> Promise (avoid loading a clip twice)
+  function loadClip(m, name) {
     const key = `${m}/${name}`;
-    if (buffers.has(key) || !ctx) return;
+    if (buffers.has(key) || !ctx) return Promise.resolve();
+    if (!pending.has(key)) pending.set(key, fetchClip(m, name, key).finally(() => pending.delete(key)));
+    return pending.get(key);
+  }
+
+  async function fetchClip(m, name, key) {
     try {
       const res = await fetch(`voices/${m}/${name}.wav`);
       if (!res.ok) return;
@@ -121,10 +128,20 @@ export function createSpeaker() {
     unlock,
     say(tokens) {
       stop();
+      requestId++;
       if (mode === "off") return;
       if (isClipVoice(mode)) {
         if (ctx && hasAllClips(mode, tokens)) { playClips(mode, tokens); return; }
-        speakDevice("ja", tokens); // clips not loaded yet (or number beyond the clip range)
+        const inRange = words && tokens.every((t) => typeof t !== "number" || t < words.numbers.length);
+        if (!ctx || !inRange) { speakDevice("ja", tokens); return; } // beyond the clip range
+        // Clips still loading (just picked the voice): wait a little, then play.
+        const m = mode;
+        const id = ++requestId;
+        Promise.race([preload(m), new Promise((ok) => setTimeout(ok, 2500))]).then(() => {
+          if (id !== requestId || mode !== m) return; // a newer call replaced this one
+          if (hasAllClips(m, tokens)) playClips(m, tokens);
+          else speakDevice("ja", tokens);
+        });
         return;
       }
       speakDevice(mode === "en" ? "en" : "ja", tokens);

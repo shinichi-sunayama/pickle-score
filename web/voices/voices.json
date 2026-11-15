@@ -1,1 +1,17 @@
-[]
+[
+  {
+    "id": "zundamon",
+    "name": "ずんだもん",
+    "credit": "VOICEVOX:ずんだもん"
+  },
+  {
+    "id": "metan",
+    "name": "四国めたん",
+    "credit": "VOICEVOX:四国めたん"
+  },
+  {
+    "id": "tsumugi",
+    "name": "春日部つむぎ",
+    "credit": "VOICEVOX:春日部つむぎ"
+  }
+]

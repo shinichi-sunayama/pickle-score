@@ -1,7 +1,7 @@
 // Offline support: serve app files from cache, refresh them in the background.
 // Bump CACHE_NAME (and APP_VERSION in app.js) whenever files change.
 // Voice clips (voices/<id>/*.wav) are not listed here: they are cached when first played/preloaded.
-const CACHE_NAME = "pickle-score-v0.2.0";
+const CACHE_NAME = "pickle-score-v0.3.0";
 const FILES = [
   "./",
   "./index.html",
@@ -19,7 +19,12 @@ const FILES = [
 ];
 
 self.addEventListener("install", (event) => {
-  event.waitUntil(caches.open(CACHE_NAME).then((c) => c.addAll(FILES)).then(() => self.skipWaiting()));
+  // cache: "reload" skips the browser's HTTP cache so a new version never stores old files.
+  event.waitUntil(
+    caches.open(CACHE_NAME)
+      .then((c) => c.addAll(FILES.map((f) => new Request(f, { cache: "reload" }))))
+      .then(() => self.skipWaiting()),
+  );
 });
 
 self.addEventListener("activate", (event) => {
@@ -36,7 +41,8 @@ self.addEventListener("fetch", (event) => {
   event.respondWith(
     caches.open(CACHE_NAME).then(async (cache) => {
       const cached = await cache.match(req, { ignoreSearch: true });
-      const network = fetch(req)
+      // Page loads (navigate) cannot take extra options; other files skip the HTTP cache.
+      const network = (req.mode === "navigate" ? fetch(req) : fetch(req, { cache: "no-cache" }))
         .then((res) => { if (res.ok) cache.put(req, res.clone()); return res; })
         .catch(() => null);
       if (cached) { event.waitUntil(network); return cached; }

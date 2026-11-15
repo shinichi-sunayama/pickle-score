@@ -5,7 +5,7 @@ import {
 } from "./core.js";
 import { callTokens, createSpeaker } from "./voice.js";
 
-const APP_VERSION = "0.2.0"; // keep in sync with CACHE_NAME in sw.js
+const APP_VERSION = "0.3.0"; // keep in sync with CACHE_NAME in sw.js
 const STORE_MATCH = "pickle-score.match";
 const STORE_PREFS = "pickle-score.prefs";
 const TEAM_NAMES = ["自分たち", "相手"];
