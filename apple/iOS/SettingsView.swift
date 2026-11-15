@@ -64,6 +64,8 @@ struct SettingsView: View {
                         Text("フォント：M PLUS Rounded 1c（SIL Open Font License 1.1）")
                         ForEach(store.voices) { v in Text(v.credit) }
                     }
+                    Link("プライバシーポリシー", destination: URL(string: "https://shinichi-sunayama.github.io/pickle-score/privacy.html")!)
+                    Link("サポート・お問い合わせ", destination: URL(string: "https://shinichi-sunayama.github.io/pickle-score/support.html")!)
                     HStack(alignment: .bottom, spacing: 4) {
                         Image("dog_ohagi").resizable().scaledToFit().frame(height: 40)
                         Image("dog_kinako").resizable().scaledToFit().frame(height: 40)

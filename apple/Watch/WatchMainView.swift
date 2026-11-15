@@ -80,17 +80,25 @@ struct WatchGameOverView: View {
         let w = s.winner ?? 0
         let dog = Self.dogs[store.match.id.unicodeScalars.reduce(0) { $0 + Int($1.value) } % Self.dogs.count]
         ScrollView {
-            VStack(spacing: 4) {
-                Image("dog_\(dog)").resizable().scaledToFit().frame(height: 64)
-                    .offset(y: hop ? -8 : 0)
-                    .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: hop)
-                    .onAppear { hop = true }
-                Text("ゲームセット！").font(Theme.font(14)).foregroundStyle(Theme.orange)
-                Text("\(Labels.teamNames[w])の勝ち").font(Theme.font(16))
-                Text("\(s.score[w])-\(s.score[1 - w])").font(Theme.font(34)).monospacedDigit()
+            VStack(spacing: 2) {
+                HStack(alignment: .bottom, spacing: 6) {
+                    Image("dog_\(dog)").resizable().scaledToFit().frame(width: 54, height: 54)
+                        .offset(y: hop ? -6 : 0)
+                    VStack(alignment: .leading, spacing: 0) {
+                        Text("ゲームセット！").font(Theme.font(13)).foregroundStyle(Theme.orange)
+                        Text("\(Labels.teamNames[w])の勝ち").font(Theme.font(15))
+                    }
+                }
+                .frame(maxWidth: .infinity)
+                .task {
+                    // Start hopping after the sheet has laid out, so only the dog moves.
+                    try? await Task.sleep(nanoseconds: 300_000_000)
+                    withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { hop = true }
+                }
+                Text("\(s.score[w])-\(s.score[1 - w])").font(Theme.font(32)).monospacedDigit()
                 Button { store.newGame() } label: { Text("新しい試合").font(Theme.font(15)) }
                     .buttonStyle(LipButtonStyle(fill: Theme.orange, lip: Theme.orangeLip, corner: 14, depth: 3))
-                    .frame(height: 40)
+                    .frame(height: 38)
                 Button { store.undo() } label: { Label("1つ戻す", systemImage: "arrow.uturn.backward").font(Theme.font(13)) }
                     .buttonStyle(.bordered)
             }

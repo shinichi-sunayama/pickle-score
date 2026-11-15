@@ -275,8 +275,11 @@ struct GameOverView: View {
                 Image("dog_\(dog)").resizable().scaledToFit().frame(height: 110)
                     .offset(y: hop ? -14 : 0)
                     .rotationEffect(.degrees(hop ? 3 : -2))
-                    .animation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true), value: hop)
-                    .onAppear { hop = true }
+                    .task {
+                        // Start hopping after layout, so only the dog moves.
+                        try? await Task.sleep(nanoseconds: 300_000_000)
+                        withAnimation(.easeInOut(duration: 0.45).repeatForever(autoreverses: true)) { hop = true }
+                    }
                     .padding(.top, 14)
                 Text("\(Labels.teamNames[w])の勝ち").font(Theme.font(28))
                 Text("\(s.score[w])-\(s.score[1 - w])").font(Theme.font(56)).foregroundStyle(Theme.orange).monospacedDigit()

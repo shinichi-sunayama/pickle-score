@@ -1,7 +1,7 @@
 #!/bin/bash
 # Take App Store screenshots with simulators (needs macOS + Xcode; used by .github/workflows/screenshots.yml).
 # Run from the repository root after: bash tools/make_apple_assets.sh && xcodegen generate --spec apple/project.yml
-# Output: shots/iphone/*.png (iPhone 6.9") and shots/watch/*.png (Apple Watch)
+# Output: shots/iphone/*.png (iPhone 6.3", 1206x2622) and shots/watch/*.png (Apple Watch)
 set -euo pipefail
 
 OUT=shots
@@ -31,7 +31,7 @@ print(found[-1][1], file=sys.stderr)
 }
 
 xcrun simctl list runtimes
-PHONE=$(pick_device '^iPhone 1[6-9] Pro Max$')
+PHONE=$(pick_device '^iPhone 1[6-9] Pro$')  # 6.3" = 1206x2622, the size App Store Connect accepted for the other apps
 WATCH=$(pick_device '^Apple Watch (Ultra|Series 1[01] \(46mm\))')
 
 xcrun simctl boot "$PHONE" || true
@@ -53,8 +53,9 @@ shoot() { # $1 device, $2 bundle id, $3 output file, rest = launch arguments
   local dev=$1 bundle=$2 file=$3
   shift 3
   xcrun simctl terminate "$dev" "$bundle" 2>/dev/null || true
+  sleep 2
   xcrun simctl launch "$dev" "$bundle" -AppleLanguages "(ja)" -AppleLocale ja_JP "$@"
-  sleep 6
+  sleep 9 # sheets slide in after launch
   xcrun simctl io "$dev" screenshot "$file"
   echo "saved $file"
 }

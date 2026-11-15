@@ -16,6 +16,8 @@ chars = set(chr(c) for c in range(0x20, 0x7F))  # all printable ASCII
 chars.update("　、。・！？（）「」〜ー：／↶↻…")
 chars.update("VOICEVOX:ずんだもん四国めたん春日部つむぎ")  # voice names and credits (voices.json)
 for p in WEB.rglob("*"):
+    if p.name in {"privacy.html", "support.html"}:
+        continue  # these pages use the system font
     if p.suffix in {".html", ".js", ".json", ".webmanifest"} and "voices" not in p.parts[-2:-1]:
         chars.update(p.read_text(encoding="utf-8"))
 for p in (ROOT / "apple").rglob("*.swift"):
