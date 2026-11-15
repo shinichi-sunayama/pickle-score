@@ -25,6 +25,15 @@ jobs:
           node-version: 22
       - run: node tests/run-node.mjs
 
+  # The Swift port of the rules (apple/PickleCore) must give the same results as the web version.
+  swift-core:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: swift --version
+      - run: swift test
+        working-directory: apple/PickleCore
+
   deploy:
     if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
     needs: test

@@ -5,3 +5,10 @@ node_modules/
 xcuserdata/
 DerivedData/
 .claude/settings.local.json
+
+# Apple build outputs
+apple/.build/
+apple/PickleCore/.build/
+apple/*.xcodeproj/
+apple/build/
+apple/Generated/
