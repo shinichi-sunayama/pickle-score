@@ -1,0 +1,89 @@
+# XcodeGen spec for the iPhone + Apple Watch app. The Xcode project is generated from this file
+# (in the cloud build, or on a Mac with `xcodegen generate --spec apple/project.yml`), so it is not kept in git.
+# Before generating, tools/make_apple_assets.sh makes apple/Generated/*.xcassets (icon, dog pictures).
+name: PickleCall
+
+options:
+  bundleIdPrefix: com.ohagikinakokobo
+  deploymentTarget:
+    iOS: "17.0"
+    watchOS: "10.0"
+  createIntermediateGroups: true
+
+settings:
+  base:
+    MARKETING_VERSION: "0.1.0"
+    CURRENT_PROJECT_VERSION: "1"
+    SWIFT_VERSION: "5.0"
+    CODE_SIGN_STYLE: Automatic
+    ENABLE_USER_SCRIPT_SANDBOXING: YES
+
+packages:
+  PickleCore:
+    path: PickleCore
+
+targets:
+  PickleCall:
+    type: application
+    platform: iOS
+    sources:
+      - path: iOS
+      - path: Shared
+      - path: Generated/iOS.xcassets
+      - path: ../web/voices
+        type: folder
+        buildPhase: resources
+      - path: ../web/voice-words.json
+        buildPhase: resources
+    dependencies:
+      - package: PickleCore
+      - target: PickleCallWatch
+    info:
+      path: Generated/iOS-Info.plist
+      properties:
+        CFBundleDisplayName: 得点コール
+        CFBundleDevelopmentRegion: ja
+        ITSAppUsesNonExemptEncryption: false
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        UIRequiresFullScreen: true
+        UIAppFonts: [MPLUSRounded1c-Bold.ttf]
+        LSApplicationCategoryType: public.app-category.sports
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ohagikinakokobo.picklecall
+        PRODUCT_NAME: PickleCall
+        TARGETED_DEVICE_FAMILY: "1"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    scheme: {}
+
+  PickleCallWatch:
+    type: application
+    platform: watchOS
+    sources:
+      - path: Watch
+      - path: Shared
+      - path: Generated/Watch.xcassets
+      - path: ../web/voices
+        type: folder
+        buildPhase: resources
+      - path: ../web/voice-words.json
+        buildPhase: resources
+    dependencies:
+      - package: PickleCore
+    info:
+      path: Generated/Watch-Info.plist
+      properties:
+        CFBundleDisplayName: 得点コール
+        CFBundleDevelopmentRegion: ja
+        WKApplication: true
+        WKCompanionAppBundleIdentifier: com.ohagikinakokobo.picklecall
+        WKRunsIndependentlyOfCompanionApp: false
+        UIAppFonts: [MPLUSRounded1c-Bold.ttf]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ohagikinakokobo.picklecall.watchkitapp
+        PRODUCT_NAME: PickleCallWatch
+        TARGETED_DEVICE_FAMILY: "4"
+        SKIP_INSTALL: YES
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon

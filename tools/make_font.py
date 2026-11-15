@@ -10,12 +10,16 @@ from fontTools import subset
 ROOT = Path(__file__).resolve().parent.parent
 WEB = ROOT / "web"
 OUT = WEB / "fonts" / "mplus-rounded-bold.woff2"
+OUT_TTF = ROOT / "apple" / "Shared" / "Fonts" / "MPLUSRounded1c-Bold.ttf"  # iPhone / Watch apps
 
 chars = set(chr(c) for c in range(0x20, 0x7F))  # all printable ASCII
 chars.update("　、。・！？（）「」〜ー：／↶↻…")
 chars.update("VOICEVOX:ずんだもん四国めたん春日部つむぎ")  # voice names and credits (voices.json)
 for p in WEB.rglob("*"):
     if p.suffix in {".html", ".js", ".json", ".webmanifest"} and "voices" not in p.parts[-2:-1]:
+        chars.update(p.read_text(encoding="utf-8"))
+for p in (ROOT / "apple").rglob("*.swift"):
+    if ".build" not in p.parts:
         chars.update(p.read_text(encoding="utf-8"))
 chars = {c for c in chars if c.isprintable() and ord(c) >= 0x20}
 
@@ -31,3 +35,13 @@ s.subset(font)
 OUT.parent.mkdir(parents=True, exist_ok=True)
 subset.save_font(font, str(OUT), opts)
 print(f"{len(chars)} characters -> {OUT} ({OUT.stat().st_size // 1024} KB)")
+
+# Same subset as TrueType for the Apple apps (they cannot load woff2).
+opts.flavor = None
+font = subset.load_font(sys.argv[1], opts)
+s = subset.Subsetter(opts)
+s.populate(text="".join(sorted(chars)))
+s.subset(font)
+OUT_TTF.parent.mkdir(parents=True, exist_ok=True)
+subset.save_font(font, str(OUT_TTF), opts)
+print(f"-> {OUT_TTF} ({OUT_TTF.stat().st_size // 1024} KB)")
