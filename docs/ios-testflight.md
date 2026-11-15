@@ -6,7 +6,7 @@ Mac がなくても、GitHub のクラウドの Mac で組み立て・署名し�
 ## 段階
 | 段階 | 内容 | だれが | 状態 |
 |---|---|---|---|
-| 1 | Swift のアプリを書く（`apple/`） | Claude | |
+| 1 | Swift のアプリを書く（`apple/`） | Claude | 済（2026-11-15、署名なしの組み立て成功：Xcode 26.6、run 43681472505） |
 | 2 | バンドル ID を 2 つ登録し、App Store Connect にアプリを作る | ユーザー | |
 | 3 | このリポジトリの GitHub の Secrets に鍵を 4 つ入れる | ユーザー | |
 | 4 | クラウドで組み立て・署名して App Store Connect に上げる | Claude | |

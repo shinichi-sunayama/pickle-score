@@ -18,6 +18,12 @@
 - `tools/make_icons.py` … アイコン作成（Pillow）。`tools/make_font.py` と `tools/make_voices.py` は fonttools・brotli／VOICEVOX が必要。
 - `docs/rules.md`（出典）、`docs/decisions.md`（決定ログ）、`docs/mac-setup.md`（B の準備）、`docs/asset-licenses.md`（素材の条件）、`docs/art/icon.md`（Gemini 用アイコンの指示文）。
 
+## iPhone＋Apple Watch 版（`apple/`、Mac なしで作る）
+- `apple/PickleCore/` … 数え方・履歴・読み上げの言葉の Swift 版（web/core.js・history.js の移植）。テストは `tests/cases.json` を共有し、GitHub の Linux で `swift test`（pages.yml の swift-core）。**ルールを変えたら JS と Swift の両方を直す。**
+- `apple/project.yml` … XcodeGen の設定（Xcode プロジェクトは作るたびに生成、git に入れない）。`apple/iOS`・`apple/Watch`・共通の `apple/Shared`。声は `web/voices`、犬とアイコンは `tools/make_apple_assets.sh` が `apple/Generated/` に作る。
+- `.github/workflows/apple.yml` … クラウドの Mac（公開リポジトリなので無料）で組み立て。`apple/` を push すると署名なしで組み立て確認、`gh workflow run apple.yml -f upload=true` で署名して TestFlight へ。手順は `docs/ios-testflight.md`。
+- バンドル ID：`com.ohagikinakokobo.picklecall`（iPhone）・`com.ohagikinakokobo.picklecall.watchkitapp`（Watch）。フォントの PostScript 名は `RoundedMplus1c-Bold`。
+
 ## 動かし方（Windows）
 - この PC には Node がない。`.claude/launch.json` の `pickle-score`（python http.server、ポート 8123）で開き、
   画面は `/web/index.html`、テストは `/tests/index.html`。
