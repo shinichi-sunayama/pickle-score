@@ -1,0 +1,216 @@
+{
+  "about": [
+    "Shared rule test cases (used by the web tests and, later, by the Swift tests).",
+    "results: one letter per rally. W = the serving side won the rally, L = the serving side lost it.",
+    "checks: key = number of rallies played so far, value = '<score call> <R|L> T<serving team>'.",
+    "  R/L = the server serves from the right/left half of the court.",
+    "winner: winning team after all results (null = game still going).",
+    "rallies: number of rallies that actually counted (rallies after the game ends are ignored).",
+    "config fields not given use the defaults: doubles, sideout, target 11, winBy 2, firstServer 0.",
+    "Values were worked out by hand from the 2026 USA Pickleball Official Rulebook (see docs/rules.md)."
+  ],
+  "cases": [
+    {
+      "name": "doubles side-out: start, server 2 at start, side outs, second server",
+      "config": {},
+      "results": "LLLWWLWLWLLW",
+      "checks": {
+        "0": "0-0-2 R T0",
+        "1": "0-0-1 R T1",
+        "2": "0-0-2 L T1",
+        "3": "0-0-1 R T0",
+        "4": "1-0-1 L T0",
+        "5": "2-0-1 R T0",
+        "6": "2-0-2 L T0",
+        "7": "3-0-2 R T0",
+        "8": "0-3-1 R T1",
+        "9": "1-3-1 L T1",
+        "10": "1-3-2 R T1",
+        "11": "3-1-1 R T0",
+        "12": "4-1-1 L T0"
+      },
+      "winner": null,
+      "rallies": 12
+    },
+    {
+      "name": "doubles side-out: the starting team gets only one server",
+      "config": {},
+      "results": "WWL",
+      "checks": {
+        "0": "0-0-2 R T0",
+        "1": "1-0-2 L T0",
+        "2": "2-0-2 R T0",
+        "3": "0-2-1 R T1"
+      },
+      "winner": null,
+      "rallies": 3
+    },
+    {
+      "name": "doubles side-out: first server after side out may be the partner (odd score)",
+      "config": {},
+      "results": "WLLL",
+      "checks": {
+        "1": "1-0-2 L T0",
+        "2": "0-1-1 R T1",
+        "3": "0-1-2 L T1",
+        "4": "1-0-1 R T0"
+      },
+      "winner": null,
+      "rallies": 4
+    },
+    {
+      "name": "doubles side-out: 11 straight points wins, extra rallies ignored",
+      "config": {},
+      "results": "WWWWWWWWWWWWW",
+      "checks": {
+        "10": "10-0-2 R T0",
+        "11": "11-0-2 L T0"
+      },
+      "winner": 0,
+      "rallies": 11
+    },
+    {
+      "name": "doubles side-out: must win by 2 (11-10 is not over)",
+      "config": {},
+      "results": "WWWWWWWWWWLWWWWWWWWWWLLWW",
+      "checks": {
+        "10": "10-0-2 R T0",
+        "11": "0-10-1 R T1",
+        "21": "10-10-1 R T1",
+        "22": "10-10-2 L T1",
+        "23": "10-10-1 R T0",
+        "24": "11-10-1 L T0",
+        "25": "12-10-1 R T0"
+      },
+      "winner": 0,
+      "rallies": 25
+    },
+    {
+      "name": "doubles side-out: win by 1 setting ends at 11-10",
+      "config": { "winBy": 1 },
+      "results": "WWWWWWWWWWLWWWWWWWWWWLLWW",
+      "checks": {
+        "24": "11-10-1 L T0"
+      },
+      "winner": 0,
+      "rallies": 24
+    },
+    {
+      "name": "doubles side-out: game to 15",
+      "config": { "target": 15 },
+      "results": "WWWWWWWWWWWWWWW",
+      "checks": {
+        "11": "11-0-2 L T0",
+        "14": "14-0-2 R T0",
+        "15": "15-0-2 L T0"
+      },
+      "winner": 0,
+      "rallies": 15
+    },
+    {
+      "name": "doubles side-out: other team serves first",
+      "config": { "firstServer": 1 },
+      "results": "LW",
+      "checks": {
+        "0": "0-0-2 R T1",
+        "1": "0-0-1 R T0",
+        "2": "1-0-1 L T0"
+      },
+      "winner": null,
+      "rallies": 2
+    },
+    {
+      "name": "doubles side-out: receiving team wins the game after a side out",
+      "config": {},
+      "results": "LWWWWWWWWWWW",
+      "checks": {
+        "1": "0-0-1 R T1",
+        "11": "10-0-1 R T1",
+        "12": "11-0-1 L T1"
+      },
+      "winner": 1,
+      "rallies": 12
+    },
+    {
+      "name": "singles side-out: two-number call, side by server's own score",
+      "config": { "players": "singles" },
+      "results": "WWLWLWL",
+      "checks": {
+        "0": "0-0 R T0",
+        "1": "1-0 L T0",
+        "2": "2-0 R T0",
+        "3": "0-2 R T1",
+        "4": "1-2 L T1",
+        "5": "2-1 R T0",
+        "6": "3-1 L T0",
+        "7": "1-3 L T1"
+      },
+      "winner": null,
+      "rallies": 7
+    },
+    {
+      "name": "singles side-out: 11-0 win",
+      "config": { "players": "singles" },
+      "results": "WWWWWWWWWWW",
+      "checks": {
+        "11": "11-0 L T0"
+      },
+      "winner": 0,
+      "rallies": 11
+    },
+    {
+      "name": "doubles rally scoring: two-number call, one server, immediate side out",
+      "config": { "scoring": "rally" },
+      "results": "WLWLL",
+      "checks": {
+        "0": "0-0 R T0",
+        "1": "1-0 L T0",
+        "2": "1-1 R T1",
+        "3": "2-1 L T1",
+        "4": "2-2 R T0",
+        "5": "3-2 R T1"
+      },
+      "winner": null,
+      "rallies": 5
+    },
+    {
+      "name": "doubles rally scoring: receiving team can win the game (no freeze in 2026)",
+      "config": { "scoring": "rally" },
+      "results": "WWWWWWWWWWLLW",
+      "checks": {
+        "10": "10-0 R T0",
+        "11": "1-10 R T1",
+        "12": "11-1 R T0"
+      },
+      "winner": 0,
+      "rallies": 12
+    },
+    {
+      "name": "doubles rally scoring: game to 21, win by 2",
+      "config": { "scoring": "rally", "target": 21 },
+      "results": "WWWWWWWWWWWWWWWWWWWWLWWWWWWWWWWWWWWWWWWWLW",
+      "checks": {
+        "20": "20-0 R T0",
+        "21": "1-20 R T1",
+        "40": "20-20 L T1",
+        "41": "21-20 R T0",
+        "42": "22-20 L T0"
+      },
+      "winner": 0,
+      "rallies": 42
+    },
+    {
+      "name": "singles rally scoring",
+      "config": { "players": "singles", "scoring": "rally" },
+      "results": "LWL",
+      "checks": {
+        "0": "0-0 R T0",
+        "1": "1-0 L T1",
+        "2": "2-0 R T1",
+        "3": "1-2 L T0"
+      },
+      "winner": null,
+      "rallies": 3
+    }
+  ]
+}
