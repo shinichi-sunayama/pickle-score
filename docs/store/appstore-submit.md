@@ -83,7 +83,7 @@ VOICEVOX:春日部つむぎ
 名前やサブタイトルにある言葉（ピックルボール・おはぎ・コール・得点を数え…）は入れなくてよい。ほかのアプリ名・商標（キャラクター名を含む）は入れない。
 
 ### サポート URL・マーケティング URL
-- サポート URL：https://shinichi-sunayama.github.io/pickle-score/support.html
+- サポート URL：https://shinichi-sunayama.github.io/pickle-score/support.html（連絡先は工房のメール。ほかの作品のような Google フォームは必須ではない。作ったら URL を Claude に渡せばページのリンクを差し替える）
 - マーケティング URL：https://shinichi-sunayama.github.io/pickle-score/ （ウェブ版）
 
 ### 著作権
@@ -117,7 +117,21 @@ No account or sign-in is needed. How to test:
 Scoring follows the USA Pickleball Official Rulebook 2026. This app is unofficial and not affiliated with USA Pickleball.
 The voices were generated with VOICEVOX (commercial use allowed with credit; credits are in Settings and in the description). The dog pictures and icon are our own.
 No data leaves the device: no ads, no analytics, no tracking.
+
+Answers we were asked for on earlier first submissions (Guideline 2.1), given in advance:
+1. Purpose and audience: helps pickleball players, especially beginners, keep track of the score call during recreational games.
+2. External services: none (no server, ads, analytics, tracking or account).
+3. Regional differences: none (Japanese interface, works the same everywhere).
+4. Third-party material: VOICEVOX voices (commercial use allowed with credit), M PLUS Rounded 1c font (SIL Open Font License). The dog pictures and icon are our own.
+A screen recording from a physical iPhone, starting on the Home Screen, is attached.
 ```
+
+### 添付ファイル（審査用の画面収録、最初から付ける）
+ほかの作品は初回に毎回 2.1 で動画を求められたので、最初から付けて往復を減らす（必須ではない）。
+1. 実機の iPhone で「画面収録」を始め、**ホーム画面から**「おはぎコール」を開く。緑・赤のボタンを何回か、「1つ戻す」、履歴（時計のボタン）、設定で声を選ぶ（試しに鳴る）まで、30秒〜1分。
+2. 動画を Claude に渡す → `tools/review-video.ps1`（ほえほえチワ隊のものを流用）と同じ方法で、ホーム画面のぼかし・無音・30fps・高さ 1920 に加工する。**加工前の動画はそのまま付けない**（壁紙・通知が映る）。
+3. 「App Review に関する情報」の「添付ファイル」に加工した動画を付けて「保存」。
+- Apple Watch は画面収録ができないので、メモの説明だけでよい。
 
 ### バージョンのリリース
 **「このバージョンを手動でリリースする」** を選ぶ。
