@@ -64,6 +64,7 @@ gh workflow run apple.yml -R shinichi-sunayama/pickle-score -f upload=true
 4. Apple Watch には、iPhone の「Watch」アプリ →「マイウォッチ」→ 下のほうの「おはぎコール」→「インストール」（自動で入ることもある）
 
 ## 気をつけること
+- App Store Connect に出るビルド番号：2026-11-15 の 3 回は Xcode が 1・2・3 に振り直した（run 3→1、run 5→2、run 9→3）。以降は振り直しを止め、Actions の実行番号がそのまま出る
 - ブラウザで GitHub の設定ページが 404 になるときは、shinichi-sunayama でログインしていない（ログインし直すと開ける）
 - バンドル ID は一度使うと変えられない
 - Watch アプリは Watch だけで数えられる（iPhone を持ってコートに入らなくてよい）。iPhone と Watch の数えはまだ別々（同期はあとで検討）
